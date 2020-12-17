@@ -1,0 +1,4 @@
+* dot-files
+My personal dot files
+** Usage
+To use these file locally, you should create symbolic links.
