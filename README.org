@@ -1,4 +1,4 @@
 * dot-files
 My personal dot files
 ** Usage
-To use these file locally, you should create symbolic links.
+Create symlinks to these files to use them locally.
