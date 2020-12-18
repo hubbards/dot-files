@@ -1,5 +1,5 @@
-# User gitignore file for all repositories.
-# See git-config(1) and gitignore(5) manuals for more information.
+# User gitignore file for all repositories.  See git-config(1) and gitignore(5)
+# manuals for more information.
 
 # macOS system file
 .DS_Store
