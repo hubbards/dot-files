@@ -45,14 +45,10 @@
 ;;;; Fringe
 (setq-default indicate-buffer-boundaries 'left)
 
-;;;; Frame parameters
-(if (eq system-type 'darwin)
-    (add-to-list 'default-frame-alist '(font . "SF Mono")))
-(add-to-list 'initial-frame-alist '(fullscreen . maximized))
-
 ;;;; Graphical display
 (if (display-graphic-p)
     (progn
+      (add-to-list 'initial-frame-alist '(fullscreen . maximized))
       (menu-bar-mode 0)
       (tool-bar-mode 0)
       (scroll-bar-mode 0)))
