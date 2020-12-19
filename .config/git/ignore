@@ -1,10 +1,10 @@
-# User gitignore file for all repositories.  See git-config(1) and gitignore(5)
-# manuals for more information.
+# ignore
+# User-specific gitignore file.  See gitignore(5) manuals for more information.
 
-# macOS system file
+# macOS system files
 .DS_Store
 
-# Emacs backup and auto-save file
-%backup%
+# Emacs files
 *~
 \#*#*
+.#*

@@ -1,3 +1,7 @@
+# config
+# Second user-specific configuration file.  See git-config(5) manual for more
+# information.
+
 [user]
 	name = Spencer Hubbard
 	email = hubbardspencerm@gmail.com
