@@ -1,4 +1,4 @@
 * dot-files
 My personal dot files
 ** Usage
-Create symlinks to these files to use them locally.
+Create symlinks to use these files locally.
