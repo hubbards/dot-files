@@ -54,15 +54,18 @@
     (load custom-file t))
 
 ;;;; Package
+;; Enable MELPA stable package archive.
 (require 'package)
 (add-to-list 'package-archives
              '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+;; Install useful packages.
 (package-refresh-contents)
 (mapc
  (lambda (package)
    (unless (package-installed-p package)
      (package-install package)))
  init--packages)
+;; Initialize packages.
 (package-initialize)
 
 ;;;; Graphical display
@@ -71,6 +74,7 @@
 (setq use-dialog-box nil)
 (if (boundp x-gtk-use-system-tooltips)
     (setq x-gtk-use-system-tooltips nil))
+;; Show buffer boundaries in fringe.
 (setq-default
  indicate-buffer-boundaries 'left
  indicate-empty-lines t)
@@ -125,32 +129,39 @@
 (setq require-final-newline t)
 
 ;;;; Highlighting
+;; Enable hl todo minor mode when editing code.
 (add-hook 'prog-mode-hook 'hl-todo-mode)
 
 ;;;; Spell checking
+;; Use Aspell spell checking program.
 (require 'ispell)
 (when (executable-find "aspell")
   (setq ispell-program-name "aspell")
   (add-to-list 'ispell-extra-args "--sug-mode=ultra")
   (add-to-list 'ispell-extra-args "--ignore=3"))
+;; Enable flyspell minor modes automatically when editing text or code.
 (add-hook 'text-mode-hook 'flyspell-mode)
 (add-hook 'prog-mode-hook 'flyspell-prog-mode)
 
 ;;;; Syntax checking
+;; Enable flycheck minor mode automatically when editing code.
 (add-hook 'prog-mode-hook 'flycheck-mode)
 
 ;;;; Completion
+;; Enable company minor modes automatically when editing text or code.
 (add-hook 'text-mode-hook 'company-mode)
 (add-hook 'prog-mode-hook 'company-mode)
 
 ;;;; Markdown
-;; Manually add autoloads for Markdown mode.
-;; (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
-;; (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+;; Add autoloads for markdown (major) mode.
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
 
 ;;;; Lisp and Scheme
+;; Use Guile implementation of Scheme.
 (if (executable-find "guile")
     (setq scheme-program-name "guile"))
+;; Enable show paren minor mode automatically when editing Lisp.
 (add-hook 'lisp-mode-hook 'show-paren-mode)
 (add-hook 'emacs-lisp-mode-hook 'show-paren-mode)
 (add-hook 'scheme-mode-hook 'show-paren-mode)
