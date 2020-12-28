@@ -1,0 +1,4 @@
+# .gitignore
+# Project gitignore file.  See gitignore(5) manuals for more information.
+
+*.elc
