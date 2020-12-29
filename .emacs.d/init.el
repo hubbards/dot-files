@@ -14,10 +14,6 @@
 ;; TODO maybe use flymake instead of flycheck
 ;; TODO customize completion support, see haskell-mode manual
 
-;; Common lisp (CL) library.
-;; (require 'cl-lib)
-;; (require 'cl-macs)
-
 ;; This function removes a minor mode indicator from mode line by
 ;; directly modifying the minor mode association list.  Note that mode
 ;; line indicators for many minor modes are define by customizable
@@ -25,7 +21,7 @@
 ;; preferred over invoking this function.
 (defun init--hide-minor-mode (minor-mode)
   "Hide minor mode MINOR-MODE on mode line."
-  (interactive "xMinor mode to hide:")
+  (interactive "xMinor mode to hide: ")
   (let ((minor-mode-assoc (assoc minor-mode minor-mode-alist)))
     (if minor-mode-assoc
       (setcar (cdr minor-mode-assoc) nil))))
@@ -161,7 +157,7 @@
 ;; Use Guile implementation of Scheme.
 (if (executable-find "guile")
     (setq scheme-program-name "guile"))
-;; Highlight parentheses when editing Lisp.
+;; Help with nested parentheses when editing Lisp.
 (let ((helper (lambda ()
                 (show-paren-mode)
                 (rainbow-delimiters-mode))))
