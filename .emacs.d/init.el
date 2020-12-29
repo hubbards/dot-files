@@ -10,30 +10,13 @@
 ;;; Code:
 
 ;; TODO rewrite package section
+;; TODO customize `whitespace-style'
 ;; TODO maybe use flymake instead of flycheck
+;; TODO customize completion support, see haskell-mode manual
 
-;; Common lisp (CL) functions and macros.
+;; Common lisp (CL) library.
 ;; (require 'cl-lib)
 ;; (require 'cl-macs)
-
-;; Make sure to uninstall any unused packages and remove from this list.
-(defvar init--packages
-  '(magit
-    gitconfig-mode
-    gitattributes-mode
-    gitignore-mode
-    editorconfig
-    markdown-mode
-    yaml-mode
-    elm-mode
-    haskell-mode
-    flycheck
-    company
-    hl-todo
-    ;; crux
-    ;; guru-mode
-    which-key)
-  "Useful packages that aren't built-in.")
 
 ;; This function removes a minor mode indicator from mode line by
 ;; directly modifying the minor mode association list.  Note that mode
@@ -58,13 +41,29 @@
 (require 'package)
 (add-to-list 'package-archives
              '("melpa-stable" . "https://stable.melpa.org/packages/") t)
-;; Install useful packages.
+;; Install useful packages that aren't built-in.  Make sure to
+;; uninstall any unused packages and remove from this code.
 (package-refresh-contents)
-(mapc
- (lambda (package)
-   (unless (package-installed-p package)
-     (package-install package)))
- init--packages)
+(let ((packages '(magit
+                  gitconfig-mode
+                  gitattributes-mode
+                  gitignore-mode
+                  editorconfig
+                  markdown-mode
+                  yaml-mode
+                  elm-mode
+                  haskell-mode
+                  flycheck
+                  company
+                  hl-todo
+                  rainbow-delimiters
+                  ;; crux
+                  ;; guru-mode
+                  which-key))
+      (helper (lambda (package)
+                (unless (package-installed-p package)
+                  (package-install package)))))
+  (mapc helper packages))
 ;; Initialize packages.
 (package-initialize)
 
@@ -75,9 +74,8 @@
 (if (boundp x-gtk-use-system-tooltips)
     (setq x-gtk-use-system-tooltips nil))
 ;; Show buffer boundaries in fringe.
-(setq-default
- indicate-buffer-boundaries 'left
- indicate-empty-lines t)
+(setq-default indicate-buffer-boundaries 'left
+              indicate-empty-lines t)
 
 ;;;; Tab-line
 (global-tab-line-mode)
@@ -118,18 +116,20 @@
 
 ;;;; Filling
 ;; (setq-default fill-column 80)
+;; Show fill column when editing text or code.
 ;; (add-hook 'text-mode-hook 'display-fill-column-indicator-mode)
 ;; (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
 
 ;;;; White space
-;; TODO customize `whitespace-style'
+(setq require-final-newline t)
+;; Show white space when editing text or code.
 ;; (add-hook 'text-mode-hook 'whitespace-mode)
 ;; (add-hook 'prog-mode-hook 'whitespace-mode)
+;; Cleanup whitespace before saving.
 ;; (add-hook 'before-save-hook 'whitespace-cleanup)
-(setq require-final-newline t)
 
 ;;;; Highlighting
-;; Enable hl todo minor mode when editing code.
+;; Highlight special words in comments when editing code.
 (add-hook 'prog-mode-hook 'hl-todo-mode)
 
 ;;;; Spell checking
@@ -139,16 +139,16 @@
   (setq ispell-program-name "aspell")
   (add-to-list 'ispell-extra-args "--sug-mode=ultra")
   (add-to-list 'ispell-extra-args "--ignore=3"))
-;; Enable flyspell minor modes automatically when editing text or code.
+;; Enable on-the-fly spell checking when editing text or code.
 (add-hook 'text-mode-hook 'flyspell-mode)
 (add-hook 'prog-mode-hook 'flyspell-prog-mode)
 
 ;;;; Syntax checking
-;; Enable flycheck minor mode automatically when editing code.
+;; Enable on-the-fly syntax checking when editing code.
 (add-hook 'prog-mode-hook 'flycheck-mode)
 
 ;;;; Completion
-;; Enable company minor modes automatically when editing text or code.
+;; Enable completions when editing text or code.
 (add-hook 'text-mode-hook 'company-mode)
 (add-hook 'prog-mode-hook 'company-mode)
 
@@ -161,12 +161,12 @@
 ;; Use Guile implementation of Scheme.
 (if (executable-find "guile")
     (setq scheme-program-name "guile"))
-;; Enable show paren minor mode automatically when editing Lisp.
-(add-hook 'lisp-mode-hook 'show-paren-mode)
-(add-hook 'emacs-lisp-mode-hook 'show-paren-mode)
-(add-hook 'scheme-mode-hook 'show-paren-mode)
-
-;;;; Haskell
-;; TODO customize completion support, see haskell-mode manual
+;; Highlight parentheses when editing Lisp.
+(let ((helper (lambda ()
+                (show-paren-mode)
+                (rainbow-delimiters-mode))))
+  (add-hook 'lisp-mode-hook helper)
+  (add-hook 'emacs-lisp-mode-hook helper)
+  (add-hook 'scheme-mode-hook helper))
 
 ;;; init.el ends here
