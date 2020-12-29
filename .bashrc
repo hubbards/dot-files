@@ -1,6 +1,6 @@
 # .bashrc
-# Bash reads and executes commands from this file when invoked as an interactive
-# non-login shell, see Bash manual.
+# Bash reads and executes commands from this file when invoked as an
+# interactive non-login shell, see Bash manual.
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
@@ -17,19 +17,19 @@ export PATH
 PS1='\[\033[1m\][\u@\h \W]
 \$\[\033[0m\] '
 
-# Uncomment the following line if you don't like systemctl's auto-paging
-# feature:
+# Uncomment the following line if you don't like systemctl's
+# auto-paging feature:
 # export SYSTEMD_PAGER=
 
 # User specific aliases and functions
 
-# GNU color option
+# GNU color option for ls
 alias ls='ls --color=auto'
+# BSD color option for ls
+# alias ls='ls -G'
+
+# GNU (and BSD) color option for grep.  Note that egrep and fgrep are
+# deprecated; use -E and -F options, respectively, to grep instead.
 alias grep='grep --color=auto'
-alias egrep='egrep --color=auto'
-alias fgrep='fgrep --color=auto'
 alias zgrep='zgrep --color=auto'
-alias xzgrep='xzgrep --color=auto'
-alias xzegrep='xzegrep --color=auto'
-alias xzfgrep='xzfgrep --color=auto'
 
