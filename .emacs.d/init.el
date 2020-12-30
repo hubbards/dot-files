@@ -76,8 +76,7 @@
    ((boundp 'font-use-system-font) (setq font-use-system-font t))
    ;; Otherwise, check if preferred fonts are installed and use first
    ;; one found (if any).
-   ((matchp "SF Mono")
-    (add-to-list 'default-frame-alist '(font . "SF Mono")))
+   ((matchp "SF Mono") (set-face-font 'default "SF Mono"))
    ;; NOTE add other font cases here
    ))
 ;; Use echo area instead of dialog boxes on mouse click.
