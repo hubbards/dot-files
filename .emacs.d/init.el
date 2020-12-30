@@ -12,7 +12,7 @@
 ;; TODO rewrite package section
 ;; TODO customize `whitespace-style'
 ;; TODO maybe use flymake instead of flycheck
-;; TODO customize completion support, see haskell-mode manual
+;; TODO customize completion support for haskell-mode
 
 ;; This function removes a minor mode indicator from mode line by
 ;; directly modifying the minor mode association list.  Note that mode
@@ -55,7 +55,9 @@
                   rainbow-delimiters
                   ;; crux
                   ;; guru-mode
-                  which-key))
+                  which-key
+                  ;; NOTE add other packages here
+                  ))
       (helper (lambda (package)
                 (unless (package-installed-p package)
                   (package-install package)))))
@@ -66,8 +68,23 @@
 ;;;; Graphical display
 (load-theme 'adwaita)
 (blink-cursor-mode 0)
-(setq use-dialog-box nil)
-(if (boundp x-gtk-use-system-tooltips)
+;; Set default font.
+(cl-flet ((matchp (pattern)
+                  (consp (x-list-fonts pattern 'default nil 1))))
+  (cond
+   ;; Use system default font on GNOME desktop.
+   ((boundp 'font-use-system-font) (setq font-use-system-font t))
+   ;; Otherwise, check if preferred fonts are installed and use first
+   ;; one found (if any).
+   ((matchp "SF Mono")
+    (add-to-list 'default-frame-alist '(font . "SF Mono")))
+   ;; NOTE add other font cases here
+   ))
+;; Use echo area instead of dialog boxes on mouse click.
+(if (display-popup-menus-p)
+    (setq use-dialog-box nil))
+;; Don't use GTK+ tooltips.
+(if (boundp 'x-gtk-use-system-tooltips)
     (setq x-gtk-use-system-tooltips nil))
 ;; Show buffer boundaries in fringe.
 (setq-default indicate-buffer-boundaries 'left
@@ -157,12 +174,14 @@
 ;; Use Guile implementation of Scheme.
 (if (executable-find "guile")
     (setq scheme-program-name "guile"))
-;; Help with nested parentheses when editing Lisp.
+;; Enable some helpful minor modes when editing Lisp.
 (let ((helper (lambda ()
                 (show-paren-mode)
                 (rainbow-delimiters-mode))))
   (add-hook 'lisp-mode-hook helper)
   (add-hook 'emacs-lisp-mode-hook helper)
-  (add-hook 'scheme-mode-hook helper))
+  (add-hook 'scheme-mode-hook helper)
+  ;; NOTE add to other lisp hooks here
+  )
 
 ;;; init.el ends here
