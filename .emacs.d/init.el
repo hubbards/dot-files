@@ -24,7 +24,7 @@
   (interactive "xMinor mode to hide: ")
   (let ((minor-mode-assoc (assoc minor-mode minor-mode-alist)))
     (if minor-mode-assoc
-      (setcar (cdr minor-mode-assoc) nil))))
+        (setcar (cdr minor-mode-assoc) nil))))
 
 ;;;; Custom
 ;; Use a separate file for custom settings.
@@ -66,9 +66,8 @@
 (package-initialize)
 
 ;;;; Graphical display
+;; Set theme and faces.
 (load-theme 'adwaita)
-(blink-cursor-mode 0)
-;; Set default font.
 (cl-flet ((matchp (pattern)
                   (consp (x-list-fonts pattern 'default nil 1))))
   (cond
@@ -77,20 +76,26 @@
    ;; Otherwise, check if preferred fonts are installed and use first
    ;; one found (if any).
    ((matchp "SF Mono") (set-face-font 'default "SF Mono"))
-   ;; NOTE add other font cases here
+   ;; NOTE add cases for other fonts here
    ))
-;; Use echo area instead of dialog boxes on mouse click.
+;; Disable some default UI.
+(if (fboundp 'blink-cursor-mode)
+    (blink-cursor-mode 0))
 (if (display-popup-menus-p)
+    ;; Use echo area instead of dialog boxes on mouse click.
     (setq use-dialog-box nil))
-;; Don't use GTK+ tooltips.
 (if (boundp 'x-gtk-use-system-tooltips)
+    ;; Use Emacs tooltips instead of GTK+.
     (setq x-gtk-use-system-tooltips nil))
+
+;;;; Fringe
 ;; Show buffer boundaries in fringe.
 (setq-default indicate-buffer-boundaries 'left
               indicate-empty-lines t)
 
 ;;;; Tab-line
-(global-tab-line-mode)
+(if (fboundp 'global-tab-line-mode)
+    (global-tab-line-mode))
 
 ;;;; Mode-line
 (line-number-mode)
@@ -103,7 +108,7 @@
       company-lighter nil
       eldoc-minor-mode-string nil)
 
-;;;; File and buffer
+;;;; Files
 (setq make-backup-files nil)
 (global-auto-revert-mode)
 
