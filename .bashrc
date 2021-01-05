@@ -25,8 +25,6 @@ PS1='\[\033[1m\][\u@\h \W]
 
 # GNU color option for ls
 alias ls='ls --color=auto'
-# BSD color option for ls
-# alias ls='ls -G'
 
 # GNU (and BSD) color option for grep.  Note that egrep and fgrep are
 # deprecated; use -E and -F options, respectively, to grep instead.
