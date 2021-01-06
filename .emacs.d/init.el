@@ -12,7 +12,7 @@
 ;; TODO rewrite package section
 ;; TODO customize `whitespace-style'
 ;; TODO maybe use flymake instead of flycheck
-;; TODO customize completion support for haskell-mode
+;; TODO customize haskell-mode
 
 ;; This function removes a minor mode indicator from mode line by
 ;; directly modifying the minor mode association list.  Note that mode
@@ -22,9 +22,8 @@
 (defun init--hide-minor-mode (minor-mode)
   "Hide minor mode MINOR-MODE on mode line."
   (interactive "xMinor mode to hide: ")
-  (let ((minor-mode-assoc (assoc minor-mode minor-mode-alist)))
-    (if minor-mode-assoc
-        (setcar (cdr minor-mode-assoc) nil))))
+  (if-let ((minor-mode-assoc (assoc minor-mode minor-mode-alist)))
+      (setcar (cdr minor-mode-assoc) nil)))
 
 ;;;; Custom
 ;; Use a separate file for custom settings.
@@ -179,13 +178,26 @@
 (if (executable-find "guile")
     (setq scheme-program-name "guile"))
 ;; Enable some helpful minor modes when editing Lisp.
-(let ((helper (lambda ()
-                (show-paren-mode)
-                (rainbow-delimiters-mode))))
-  (add-hook 'lisp-mode-hook helper)
-  (add-hook 'emacs-lisp-mode-hook helper)
-  (add-hook 'scheme-mode-hook helper)
-  ;; NOTE add to other lisp hooks here
-  )
+(dolist (hook '(lisp-mode-hook
+                emacs-lisp-mode-hook
+                scheme-mode-hook
+                ;; NOTE add other (independent) lisp mode hooks here
+                ))
+  (add-hook hook 'show-paren-mode)
+  (add-hook hook 'rainbow-delimiters-mode))
+
+;;;; Haskell
+;; Suggested initialization in "Interactive Haskell" section of the
+;; "Haskell Mode" documentation.
+;; (require 'haskell-interactive-mode)
+;; (require 'haskell-process)
+;; (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+;; (add-hook 'haskell-mode-hook
+;;           (lambda ()
+;;             (make-local-variable 'company-backends)
+;;             (push '(company-capf company-dabbrev-code) company-backends)))
+;; (setq-default haskell-process-suggest-remove-import-lines t
+;;               haskell-process-auto-import-loaded-modules t
+;;               haskell-process-log t)
 
 ;;; init.el ends here
