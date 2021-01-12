@@ -4,7 +4,10 @@
 # macOS system files
 .DS_Store
 
-# Emacs files
+# Emacs backup and auto-save files
 *~
 \#*#*
 .#*
+
+# Compiled Emacs Lisp files
+*.elc
