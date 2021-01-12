@@ -12,7 +12,7 @@
 ;; TODO rewrite package section
 ;; TODO customize `whitespace-style'
 ;; TODO maybe use flymake instead of flycheck
-;; TODO customize haskell-mode
+;; TODO maybe use haskell-language-server instead of haskell-mode
 
 ;; This function removes a minor mode indicator from mode line by
 ;; directly modifying the minor mode association list.  Note that mode
@@ -32,29 +32,38 @@
     (load custom-file t))
 
 ;;;; Package
-;; Enable MELPA stable package archive.
+;; Enable additional package archives.
 (require 'package)
 (add-to-list 'package-archives
              '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/") t)
+(add-to-list 'package-archive-priorities '("gnu" . 1))
+(add-to-list 'package-archive-priorities '("melpa-stable" . 2))
+(add-to-list 'package-archive-priorities '("melpa" . 0))
 ;; Install useful packages that aren't built-in.  Make sure to
 ;; uninstall any unused packages and remove from this code.
 (package-refresh-contents)
-(let ((packages '(magit
+(let ((packages '(which-key
+                  ;; crux
+                  ;; guru-mode
+                  flycheck
+                  company
+                  ;; projectile
+                  hl-todo
+                  rainbow-delimiters
+                  magit
                   gitconfig-mode
                   gitattributes-mode
                   gitignore-mode
                   editorconfig
                   markdown-mode
                   yaml-mode
-                  elm-mode
                   haskell-mode
-                  flycheck
-                  company
-                  hl-todo
-                  rainbow-delimiters
-                  ;; crux
-                  ;; guru-mode
-                  which-key
+                  idris-mode
+                  ;; lsp-mode
+                  ;; lsp-ui
+                  ;; lsp-haskell
                   ;; NOTE add other packages here
                   ))
       (helper (lambda (package)
@@ -104,8 +113,7 @@
       editorconfig-mode-lighter nil
       flyspell-mode-line-string nil
       flycheck-mode-line nil
-      company-lighter nil
-      eldoc-minor-mode-string nil)
+      company-lighter nil)
 
 ;;;; Files
 (setq make-backup-files nil)
@@ -185,19 +193,22 @@
                 ))
   (add-hook hook 'show-paren-mode)
   (add-hook hook 'rainbow-delimiters-mode))
+;; Only enable ElDoc mode when editing Emacs Lisp.
+(global-eldoc-mode 0)
+(add-hook 'emacs-lisp-mode-hook 'eldoc-mode)
 
 ;;;; Haskell
-;; Suggested initialization in "Interactive Haskell" section of the
-;; "Haskell Mode" documentation.
-;; (require 'haskell-interactive-mode)
-;; (require 'haskell-process)
-;; (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
-;; (add-hook 'haskell-mode-hook
-;;           (lambda ()
-;;             (make-local-variable 'company-backends)
-;;             (push '(company-capf company-dabbrev-code) company-backends)))
-;; (setq-default haskell-process-suggest-remove-import-lines t
-;;               haskell-process-auto-import-loaded-modules t
-;;               haskell-process-log t)
+(setq haskell-process-suggest-remove-import-lines t
+      haskell-process-auto-import-loaded-modules t
+      haskell-process-log t)
+(setq-default haskell-doc-show-global-types t)
+(add-hook 'haskell-mode-hook 'haskell-doc-mode)
+(add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+(add-hook 'haskell-mode-hook
+          (lambda ()
+            ;; According to Haskell mode manual, this is a work-around
+            ;; to enable completion for let-bindings.
+            (make-local-variable 'company-backends)
+            (push '(company-capf company-dabbrev-code) company-backends)))
 
 ;;; init.el ends here
