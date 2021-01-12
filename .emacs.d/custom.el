@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; custom.el --- My personal custom file.
 
 ;;; Commentary:

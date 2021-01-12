@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; early-init.el --- My personal early initialization file.
 
 ;;; Commentary:
