@@ -10,7 +10,7 @@
 
 ;;; Code:
 
-;;;; Load
+;;;; Custom
 
 ;; Use a separate file for custom settings.
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
@@ -42,7 +42,7 @@
                   gitattributes-mode
                   gitignore-mode
                   ;; projectile
-                  flycheck
+                  ;; flycheck
                   company
                   editorconfig
                   hl-todo
@@ -185,7 +185,7 @@
 (add-hook 'prog-mode-hook 'flyspell-prog-mode)
 
 ;; Enable on-the-fly syntax checking when editing code.
-(add-hook 'prog-mode-hook 'flycheck-mode)
+(add-hook 'prog-mode-hook 'flymake-mode)
 
 ;; Highlight special words in code comments.
 (add-hook 'prog-mode-hook 'hl-todo-mode)
@@ -224,14 +224,14 @@
 ;;;; Haskell
 
 ;; Disable error/warning overlay if using Flycheck.
-(setq haskell-process-show-overlays nil)
+;; (setq haskell-process-show-overlays nil)
 
 ;; Show Haskell documentation.
 (add-hook 'haskell-mode-hook 'haskell-doc-mode)
 
 ;; NOTE still need to run `haskell-process-load-file' (bound to C-c C-l) after
 ;; loading Haskell file for better static analysis.
-;; (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+(add-hook 'haskell-mode-hook 'interactive-haskell-mode)
 
 ;; According to Haskell mode manual, this is a work-around to enable completion
 ;; for let-bindings.
@@ -239,5 +239,39 @@
 ;;           (lambda ()
 ;;             (make-local-variable 'company-backends)
 ;;             (push '(company-capf company-dabbrev-code) company-backends)))
+
+(require 'flymake)
+(require 'haskell-mode)
+
+;; Bind this variable to the HLint configuration file name if it is different
+;; from the default value.  Usually, this should be a buffer-local binding.
+(defvar init--hlint-file
+  ".hlint.yaml"
+  "Name of HLint configuration file to search for in project root.")
+
+(defun init--flymake-proc-hlint-init ()
+  "Initialize HLint."
+  (if (executable-find "hlint")
+      (let* ((temp-file (flymake-proc-init-create-temp-buffer-copy
+                         'flymake-proc-create-temp-inplace))
+             (args (list "--color=never" (file-relative-name temp-file)))
+             (project-root (car (project-roots (project-current))))
+             (hlint-file (expand-file-name init--hlint-file project-root)))
+        (if (file-exists-p hlint-file)
+            (push (concat "--hint=" hlint-file) args))
+        (list "hlint" args))))
+
+;; TODO use `rx' regexp
+(add-to-list 'flymake-proc-allowed-file-name-masks
+             '("\\.l?hs\\'"
+               init--flymake-proc-hlint-init
+               flymake-proc-simple-cleanup
+               flymake-proc-get-real-file-name))
+(let ((pattern
+       "^\\(.*?\\):\\([0-9]+\\):\\([0-9]+\\): \\(\\(.*\\)
+Found:\n\\s +\\(.*\\)
+Perhaps:\n\\s +\\(.*\\)\\)\n"))
+  (add-to-list 'flymake-proc-err-line-patterns
+               (list pattern 1 2 3 4)))
 
 ;;; init.el ends here
