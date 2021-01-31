@@ -1,4 +1,4 @@
-;;; init.el --- Personal file -*- lexical-binding: t; -*-
+;;; init.el --- Initialization file -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
@@ -256,9 +256,13 @@
 ;;             (make-local-variable 'company-backends)
 ;;             (push '(company-capf company-dabbrev-code) company-backends)))
 
-;; TODO rewrite this
-;; (load "~/git/dot-files/.emacs.d/sh/sh-hlint")
+;; Add HLint backend to Flymake.
 (require 'sh-hlint)
 (add-hook 'haskell-mode-hook 'sh-hlint-flymake-init)
+
+;; Add GHC backend to Flymake.
+;; TODO uncomment following 2 lines
+;; (require 'sh-ghc)
+;; (add-hook 'haskell-mode-hook 'sh-ghc-flymake-init)
 
 ;;; init.el ends here
