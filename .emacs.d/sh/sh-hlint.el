@@ -1,12 +1,16 @@
-;;; sh-hlint.el --- Flymake support for HLint -*- lexical-binding: t; -*-
+;;; sh-hlint.el --- HLint support -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
-;; This library adds support for HLint to Flymake.  A project level hint file is
-;; used if found.  See https://github.com/ndmitchell/hlint for more information
-;; about HLint and the Flymake manual for more information about Flymake.
+;; This library adds support for HLint to Emacs.  It has been tested with
+;; version 3.1.6 of HLint on Fedora 33.  See https://github.com/ndmitchell/hlint
+;; for more information about HLint.
 
-;; The library has been tested with version 3.1.6 of HLint on Fedora 33.
+;; The library includes a Flymake backend for HLint which uses a project level
+;; hint file if found.  See the Flymake manual for more information about
+;; Flymake.
+
+;; The library should be added to a package archive, eventually.
 
 ;;; Code:
 
@@ -19,8 +23,7 @@
   "Name of HLint hint file to search for in project root.")
 
 (defun sh-hlint-hint-file (&optional project)
-  "Return expected path to HLint hint file in PROJECT.
-Uses `project-current' if PROJECT is nil."
+  "Return expected path to HLint hint file in PROJECT or `project-current'."
   ;; Pattern for setting optional arguments used in Emacs Lisp Intro.
   (or project (setq project (project-current)))
   (expand-file-name sh-hlint-hint-file
@@ -29,12 +32,18 @@ Uses `project-current' if PROJECT is nil."
 ;; See https://github.com/ndmitchell/hlint for details on JSON encoding of
 ;; ideas.
 (defun sh-hlint--command (file &optional hint-file)
-  "Invoke HLint on FILE with HINT-FILE and return resulting ideas.
-No hint option is passed to HLint if HINT-FILE is nil."
+  "Invoke HLint on FILE with HINT-FILE if not nil.
+An error is thrown if hlint cannot be found."
+  (unless (executable-find "hlint")
+    (error "Cannot find hlint"))
   (let* ((opt (if (and hint-file (file-exists-p hint-file))
-                  (concat "--hint=" (shell-quote-argument hint-file) " ")
+                  (concat "--hint="
+                          (shell-quote-argument hint-file)
+                          " ")
                 ""))
-         (cmd (concat "hlint --json " opt (shell-quote-argument file))))
+         (cmd (concat "hlint --json "
+                      opt
+                      (shell-quote-argument file))))
     (json-parse-string (shell-command-to-string cmd)
                        :array-type  'list
                        :object-type 'alist
@@ -89,15 +98,11 @@ No hint option is passed to HLint if HINT-FILE is nil."
                              (sh-hlint--diag-type idea)
                              (sh-hlint--diag-text idea))))
 
-(defun sh-hlint--diags (buffer ideas)
-  "Make Flymake diagnostics for BUFFER and (JSON encoded) HLint IDEAS."
-  ;; Use sequence based map to support different Lisp types for JSON arrays.
-  (seq-map (apply-partially 'sh-hlint--diag buffer) ideas))
-
 (defun sh-hlint-flymake (report-fn &rest _args)
   "Flymake backend for HLint with REPORT-FN."
   ;; Check for HLint program.
-  (unless (executable-find "hlint") (error "Cannot find hlint program"))
+  (unless (executable-find "hlint")
+    (error "Cannot find hlint"))
   ;; Use a temp file with contents of current buffer.
   (let ((buffer    (current-buffer))
         (hint-file (sh-hlint-hint-file))
@@ -105,9 +110,9 @@ No hint option is passed to HLint if HINT-FILE is nil."
     (write-region nil nil temp-file)
     ;; Run HLint and report diagnostics.
     (unwind-protect
-        (funcall report-fn
-                 (seq-map (apply-partially 'sh-hlint--diag buffer)
-                          (sh-hlint--command temp-file hint-file)))
+        (let ((diags (apply-partially 'sh-hlint--diag buffer))
+              (ideas (sh-hlint--command temp-file hint-file)))
+          (funcall report-fn (seq-map diags ideas)))
       ;; Clean up temp file.
       (delete-file temp-file))))
 
