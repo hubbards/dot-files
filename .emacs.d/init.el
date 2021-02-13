@@ -263,13 +263,10 @@
 ;;             (make-local-variable 'company-backends)
 ;;             (push '(company-capf company-dabbrev-code) company-backends)))
 
-;; Add HLint backend to Flymake.
+;; Use HLint and GHC backends for Flymake.
 (require 'sh-hlint)
+(require 'sh-ghc)
 (add-hook 'haskell-mode-hook 'sh-hlint-flymake-init)
-
-;; Add GHC backend to Flymake.
-;; TODO uncomment following 2 lines
-;; (require 'sh-ghc)
-;; (add-hook 'haskell-mode-hook 'sh-ghc-flymake-init)
+(add-hook 'haskell-mode-hook 'sh-ghc-flymake-init)
 
 ;;; init.el ends here
