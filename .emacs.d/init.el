@@ -223,14 +223,21 @@
 (dolist (hook '(lisp-mode-hook
                 emacs-lisp-mode-hook
                 scheme-mode-hook
-                ;; NOTE add other (independent) lisp mode hooks here.
+                ;; NOTE add other (independent) Lisp mode hooks here.
                 ))
   (add-hook hook 'show-paren-mode)
-  (add-hook hook 'rainbow-delimiters-mode))
+  (add-hook hook 'rainbow-delimiters-mode)
+  (add-hook hook 'electric-pair-local-mode)
+  ;; NOTE add other minor modes here.
+  )
 
 ;; Only enable ElDoc mode when editing Emacs Lisp code.
 (global-eldoc-mode 0)
 (add-hook 'emacs-lisp-mode-hook 'eldoc-mode)
+
+;; Insert curved quotes automatically.  Lisp symbols should be delimitted by
+;; curved quotes in documentation strings and comments.
+(add-hook 'emacs-lisp-mode-hook 'electric-quote-local-mode)
 
 ;;;; Haskell
 
