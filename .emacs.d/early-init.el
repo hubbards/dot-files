@@ -12,14 +12,13 @@
 
 ;;;; Logging
 
-;; Set the minimum severity to log debugging messages.  May want to remove this
-;; at some point.
-(setq warning-minimum-log-level :debug)
+;; Set the minimum severity to log debugging messages.
+;; (setq warning-minimum-log-level :debug)
 
 ;;;; Frame
 
-;; Set initial frame parameters.  Setting this early during initialization to
-;; avoid maximization animation.
+;; Set initial frame parameters.  Maximize the frame early during initialization
+;; to avoid any maximization animation.
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 
 ;; Disable some default UI.
