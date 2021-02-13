@@ -19,7 +19,7 @@
 
 ;;;; Package
 
-;; TODO rewrite package section
+;; TODO rewrite package section.
 
 ;; Enable additional package archives.
 (require 'package)
@@ -53,7 +53,7 @@
                   yaml-mode
                   haskell-mode
                   idris-mode
-                  ;; TODO use language server protocol
+                  ;; TODO use language server protocol.
                   ;; lsp-mode
                   ;; lsp-ui
                   ;; lsp-haskell
@@ -169,13 +169,13 @@
 (add-hook 'text-mode-hook 'display-fill-column-indicator-mode)
 (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
 
-;; TODO use white space mode
-;; TODO customize `whitespace-style'
+;; TODO use white space mode.
+;; TODO customize ‘whitespace-style’.
 ;; Show white space when editing text or code.
 ;; (add-hook 'text-mode-hook 'whitespace-mode)
 ;; (add-hook 'prog-mode-hook 'whitespace-mode)
 
-;; Cleanup whitespace before saving.
+;; Cleanup whitespace before saving and add a final new line by default.
 (setq-default require-final-newline t)
 (add-hook 'before-save-hook 'whitespace-cleanup)
 
@@ -200,6 +200,8 @@
 
 ;; Highlight special words in code comments.
 (add-hook 'prog-mode-hook 'hl-todo-mode)
+
+;; TODO enable some electric modes.
 
 ;;;; Completion
 
@@ -252,7 +254,7 @@
 ;; Show Haskell documentation.
 (add-hook 'haskell-mode-hook 'haskell-doc-mode)
 
-;; NOTE need to run `haskell-process-load-file' (bound to C-c C-l) after
+;; NOTE need to run ‘haskell-process-load-file’ (bound to C-c C-l) after
 ;; loading Haskell file.
 ;; (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
 
