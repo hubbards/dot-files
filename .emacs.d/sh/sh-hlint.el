@@ -40,7 +40,7 @@
         (hint-file (sh-hlint-hint-file))
         (temp-file (make-temp-file buffer-file-name)))
     (write-region nil nil temp-file)
-    ;; TODO run HLint in asynchronous sub-process
+    ;; TODO run HLint in asynchronous sub-process.
     ;; Run HLint and report diagnostics.
     (unwind-protect
         (let ((mk-diag (apply-partially 'sh-hlint--mk-diag buffer))
@@ -137,7 +137,7 @@ An error is thrown if the severity field has an unexpected value."
     ("Suggestion" :note)
     (_            (error "Unexpected severity"))))
 
-;; TODO rewrite
+;; TODO rewrite.
 (defun sh-hlint--mk-diag-text (idea)
   "Build Flymake diagnostic text for IDEA.
 An error is thrown if either the hint or from field is null."
@@ -162,12 +162,12 @@ An error is thrown if either the hint or from field is null."
 
 ;;; Test:
 
-;; TODO move tests into separate file
+;; TODO move tests into separate file.
 
 (require 'ert)
 
 (ert-deftest sh-hlint--mk-diag-p-test-1 ()
-  "Test `sh-hlint--mk-diag-p' with idea containing expected keys and severity."
+  "Test ‘sh-hlint--mk-diag-p’ with idea containing expected keys and severity."
   (should (sh-hlint--mk-diag-p '((severity    . "Suggestion")
                                  (hint        . :null)
                                  (startLine   . :null)
@@ -179,7 +179,7 @@ An error is thrown if either the hint or from field is null."
                                  (note)))))
 
 (ert-deftest sh-hlint--mk-diag-p-test-2 ()
-  "Test `sh-hlint--mk-diag-p' with idea missing an expected key."
+  "Test ‘sh-hlint--mk-diag-p’ with idea missing an expected key."
   (should-not (sh-hlint--mk-diag-p '((severity    . "Suggestion")
                                      (startLine   . :null)
                                      (startColumn . :null)
@@ -190,7 +190,7 @@ An error is thrown if either the hint or from field is null."
                                      (note)))))
 
 (ert-deftest sh-hlint--mk-diag-p-test-3 ()
-  "Test `sh-hlint--mk-diag-p' with idea containing unexpected severity."
+  "Test ‘sh-hlint--mk-diag-p’ with idea containing unexpected severity."
   (should-not (sh-hlint--mk-diag-p '((severity    . "Ignore")
                                      (hint        . :null)
                                      (startLine   . :null)
@@ -201,11 +201,11 @@ An error is thrown if either the hint or from field is null."
                                      (to          . :null)
                                      (note)))))
 
-;; Create a temporary buffer using `with-temp-buffer' when testing
-;; `sh-hlint--mk-diag-region'.  This helps avoid a dependency on (or change to)
+;; Create a temporary buffer using ‘with-temp-buffer’ when testing
+;; ‘sh-hlint--mk-diag-region’.  This helps avoid a dependency on (or change to)
 ;; the state of the environment.  See ERT manual for more information.
 (ert-deftest sh-hlint--mk-diag-region-test-1 ()
-  "Test `sh-hlint--mk-diag-region' with idea containing non-null start and end
+  "Test ‘sh-hlint--mk-diag-region’ with idea containing non-null start and end
 lines and columns."
   (with-temp-buffer
     (insert (make-string 3 ?x))
@@ -218,19 +218,19 @@ lines and columns."
       (should (= (cdr region) 4)))))
 
 (ert-deftest sh-hlint--mk-diag-type-test-1 ()
-  "Test `sh-hlint--mk-diag-type' with ideas containing expected severities."
+  "Test ‘sh-hlint--mk-diag-type’ with ideas containing expected severities."
   (should (eq (sh-hlint--mk-diag-type '((severity . "Suggestion"))) :note))
   (should (eq (sh-hlint--mk-diag-type '((severity . "Warning"))) :warning))
   (should (eq (sh-hlint--mk-diag-type '((severity . "Error"))) :error)))
 
 (ert-deftest sh-hlint--mk-diag-type-test-2 ()
-  "Test `sh-hlint--mk-diag-type' with ideas containing unexpected severities."
+  "Test ‘sh-hlint--mk-diag-type’ with ideas containing unexpected severities."
   (should-error (sh-hlint--mk-diag-type '((severity . "Ignore"))))
   (should-error (sh-hlint--mk-diag-type '((severity . :null)))))
 
-;; Check each line of the return value of `sh-hlint--mk-diag-text' individually.
+;; Check each line of the return value of ‘sh-hlint--mk-diag-text’ individually.
 (ert-deftest sh-hlint--mk-diag-text-test-1 ()
-  "Test `sh-hlint--mk-diag-text' with idea containing text for hint, from, and
+  "Test ‘sh-hlint--mk-diag-text’ with idea containing text for hint, from, and
 to keys in addition to one note."
   (let ((text (sh-hlint--mk-diag-text '((hint . "Use null")
                                         (from . "length xs == 0")
@@ -247,7 +247,7 @@ to keys in addition to one note."
     (should (string= (pop text) "increases laziness"))))
 
 (ert-deftest sh-hlint--mk-diag-text-test-2 ()
-  "Test `sh-hlint--mk-diag-text' with idea containing text for hint and from
+  "Test ‘sh-hlint--mk-diag-text’ with idea containing text for hint and from
 keys but an empty string for to key and no note."
   (let ((text (sh-hlint--mk-diag-text '((hint . "Redundant where")
                                         (from . "where")
@@ -263,7 +263,7 @@ keys but an empty string for to key and no note."
 ;; This test covers a special case where an idea for avoiding a restricted
 ;; extension has a null to key.
 (ert-deftest sh-hlint--mk-diag-text-test-3 ()
-  "Test `sh-hlint--mk-diag-text' with idea containing text for hint and from
+  "Test ‘sh-hlint--mk-diag-text’ with idea containing text for hint and from
 keys in addition to one note but null to key."
   (let ((text (sh-hlint--mk-diag-text '((hint . "Avoid restricted extensions")
                                         (from . "{-# LANGUAGE GADTs #-}")

@@ -28,7 +28,7 @@
                          (suffix (file-name-extension buffer-file-name 't)))
                      (make-temp-file prefix nil suffix))))
     (write-region nil nil temp-file)
-    ;; TODO run GHC in asychronous sub-process
+    ;; TODO run GHC in asychronous sub-process or use GHCi inferior process.
     ;; Run GHC and report diagnostics.
     (unwind-protect
         (let ((mk-diag (apply-partially 'sh-ghc--mk-diag buffer))
@@ -39,7 +39,7 @@
       ;; Clean up temp file.
       (delete-file temp-file))))
 
-;; Add this to `haskell-mode-hook'.
+;; Add this to ‘haskell-mode-hook’.
 (defun sh-ghc-flymake-init ()
   "Initialize Flymake backend for GHC."
   (add-hook 'flymake-diagnostic-functions 'sh-ghc-flymake nil t))
@@ -133,28 +133,28 @@ An error is thrown if the severity field has an unexpected value."
 
 ;;; Test:
 
-;; TODO move tests into separate file
+;; TODO move tests into separate file.
 
 (require 'ert)
 
 ;; (ert-deftest sh-ghc--mk-diag-region-test-1 ()
-;;   ;; TODO write documentation string
-;;   ;; TODO implement
+;;   ;; TODO write documentation string.
+;;   ;; TODO implement.
 ;;   (error "Not implemented"))
 
 ;; (ert-deftest sh-ghc--mk-diag-type-test-1 ()
-;;   ;; TODO write documentation string
-;;   ;; TODO implement
+;;   ;; TODO write documentation string.
+;;   ;; TODO implement.
 ;;   (error "Not implemented"))
 
 ;; (ert-deftest sh-ghc--mk-diag-text-test-1 ()
-;;   ;; TODO write documentation string
-;;   ;; TODO implement
+;;   ;; TODO write documentation string.
+;;   ;; TODO implement.
 ;;   (error "Not implemented"))
 
 ;; (ert-deftest sh-ghc--mk-diag-p-test-1 ()
-;;   ;; TODO write documentation string
-;;   ;; TODO implement
+;;   ;; TODO write documentation string.
+;;   ;; TODO implement.
 ;;   (error "Not implemented"))
 
 (provide 'sh-ghc)
