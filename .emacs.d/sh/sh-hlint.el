@@ -40,7 +40,6 @@
         (hint-file (sh-hlint-hint-file))
         (temp-file (make-temp-file buffer-file-name)))
     (write-region nil nil temp-file)
-    ;; TODO run HLint in asynchronous sub-process.
     ;; Run HLint and report diagnostics.
     (unwind-protect
         (let ((mk-diag (apply-partially 'sh-hlint--mk-diag buffer))
@@ -220,8 +219,8 @@ lines and columns."
 (ert-deftest sh-hlint--mk-diag-type-test-1 ()
   "Test ‘sh-hlint--mk-diag-type’ with ideas containing expected severities."
   (should (eq (sh-hlint--mk-diag-type '((severity . "Suggestion"))) :note))
-  (should (eq (sh-hlint--mk-diag-type '((severity . "Warning"))) :warning))
-  (should (eq (sh-hlint--mk-diag-type '((severity . "Error"))) :error)))
+  (should (eq (sh-hlint--mk-diag-type '((severity . "Warning")))    :warning))
+  (should (eq (sh-hlint--mk-diag-type '((severity . "Error")))      :error)))
 
 (ert-deftest sh-hlint--mk-diag-type-test-2 ()
   "Test ‘sh-hlint--mk-diag-type’ with ideas containing unexpected severities."
