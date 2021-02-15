@@ -16,11 +16,16 @@
 (require 'seq)
 (require 'flymake)
 
+;; TODO change default from stack to ghc.
+(defvar sh-ghc-command
+  "stack ghc --"
+  "Command for invoking GHC.")
+
 (defun sh-ghc-flymake (report-fn &rest _args)
-  "Flymake backend for GHC with REPORT-FN."
-  (unless (or (executable-find "stack")
-              (executable-find "ghc"))
-    (error "Cannot find stack or ghc"))
+  "Flymake backend for GHC with REPORT-FN.
+An error is thrown if GHC command cannot be found."
+  (unless (executable-find sh-ghc-command)
+    (error "Cannot find GHC command"))
   ;; Use a temp file with contents of current buffer.  We must be careful with
   ;; how we name the temp file because GHC checks the file extension.
   (let ((buffer    (current-buffer))
@@ -48,27 +53,25 @@
 ;; errors.
 (defun sh-ghc--command (file)
   "Invoke GHC on FILE.
-An error is thrown if the Stack or GHC command cannot be found."
-  (let ((cmd   (let ((prog (cond ((executable-find "stack") "stack ghc -- ")
-                                 ((executable-find "ghc")   "ghc ")
-                                 (t (error "Cannot find stack or ghc"))))
-                     (opts (list "-fdiagnostics-color=never"
-                                 "-fno-code"
-                                 "-ddump-json"
-                                 "-Wall")))
-                 (concat prog
-                         (string-join opts " ")
-                         " "
-                         (shell-quote-argument file))))
-        ;; By default, JSON arrays are represented as Lisp arrays and JSON
-        ;; objects are represented as Lisp hash tables.  Use Lisp lists and
-        ;; alists instead to avoid the overhead of creating an arrays or hash
-        ;; table.
-        (parse (lambda (string)
-                 (json-parse-string string
-                                    :array-type  'list
-                                    :object-type 'alist))))
-    (seq-map parse (split-string (shell-command-to-string cmd) "\n" t))))
+An error is thrown if GHC command cannot be found."
+  (unless (executable-find sh-ghc-command)
+    (error "Cannot find GHC command"))
+  (let* ((opts (list "-fdiagnostics-color=never"
+                     "-fno-code"
+                     "-ddump-json"
+                     "-Wall"))
+         (cmd  (concat sh-ghc-command
+                       " "
+                       (string-join opts " ")
+                       " "
+                       (shell-quote-argument file))))
+    ;; By default, JSON arrays are represented as Lisp arrays and JSON objects
+    ;; are represented as Lisp hash tables.  Use Lisp lists and alists instead
+    ;; to avoid the overhead of creating an arrays or hash table.
+    (seq-map (lambda (s) (json-parse-string s
+                                            :array-type  'list
+                                            :object-type 'alist))
+             (split-string (shell-command-to-string cmd) "\n" t))))
 
 (defun sh-ghc--mk-diag-p (msg)
   "Predicate to test if a Flymake diagnostic should be made for MSG."

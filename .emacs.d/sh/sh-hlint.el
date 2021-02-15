@@ -34,7 +34,7 @@
   "Flymake backend for HLint with REPORT-FN."
   ;; Check for HLint program.
   (unless (executable-find "hlint")
-    (error "Cannot find hlint"))
+    (error "Cannot find HLint command"))
   ;; Use a temp file with contents of current buffer.
   (let ((buffer    (current-buffer))
         (hint-file (sh-hlint-hint-file))
@@ -62,7 +62,7 @@
   "Invoke HLint on FILE with HINT-FILE if not nil.
 An error is thrown if the HLint command cannot be found."
   (unless (executable-find "hlint")
-    (error "Cannot find hlint"))
+    (error "Cannot find HLint command"))
   (let* ((opt (if (and hint-file (file-exists-p hint-file))
                   (concat "--hint="
                           (shell-quote-argument hint-file)
