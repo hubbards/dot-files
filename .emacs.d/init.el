@@ -267,8 +267,8 @@
 
 ;; Use HLint and GHC backends for Flymake.
 (require 'sh-hlint)
-;; (require 'sh-ghc)
+(require 'sh-ghc)
 (add-hook 'haskell-mode-hook 'sh-hlint-flymake-init)
-;; (add-hook 'haskell-mode-hook 'sh-ghc-flymake-init)
+(add-hook 'haskell-mode-hook 'sh-ghc-flymake-init)
 
 ;;; init.el ends here

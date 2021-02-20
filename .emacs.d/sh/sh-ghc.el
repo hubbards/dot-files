@@ -2,9 +2,9 @@
 
 ;;; Commentary:
 
-;; This library adds support for GHC to Emacs.  It has been tested with
-;; version 8.6.5 of GHC on Fedora 33.  See https://gitlab.haskell.org/ghc/ghc
-;; for more information about GHC.
+;; This library adds support for GHC to Emacs.  It has been tested with version
+;; 8.6.5 of GHC and version 27.1 of Emacs on Fedora 33.  See
+;; https://gitlab.haskell.org/ghc/ghc for more information about GHC.
 
 ;; The library includes a Flymake backend for GHC.  See the Flymake manual for
 ;; more information about Flymake.  A long-term goal is to bundle the Flymake
@@ -16,59 +16,87 @@
 (require 'seq)
 (require 'flymake)
 
+;; This variable is automatically buffer-local.
+(defvar-local sh-ghc--flymake-proc
+  nil
+  "GHC process associated with current Flymake check.")
+
+;; See https://gitlab.haskell.org/ghc/ghc for details on JSON encoding of
+;; errors.
+(defun sh-ghc--flymake-proc (report-fn buffer file)
+  "Make GHC process sentinel with REPORT-FN, BUFFER, and FILE."
+  (lambda (proc _event)
+    ;; The process sentinel is called whenever the process state changes.
+    (if (eq 'exit (process-status proc))
+        (unwind-protect
+            ;; Only proceed if ‘proc’ was launched by current check.  We must be
+            ;; careful about which buffer is current because
+            ;; ‘sh-ghc--flymake-proc’ is buffer-local.
+            (if (with-current-buffer buffer (eq proc sh-ghc--flymake-proc))
+                (with-current-buffer (process-buffer proc)
+                  (flymake-log :debug (buffer-string))
+                  (goto-char (point-min))
+                  (let ((diags nil))
+                    (while (not (eobp))
+                      (narrow-to-region (line-beginning-position)
+                                        (line-end-position))
+                      ;; By default, JSON arrays are represented as Lisp arrays
+                      ;; and JSON objects are represented as Lisp hash tables.
+                      ;; Use Lisp lists and alists instead to avoid the overhead
+                      ;; of creating an arrays or hash table.
+                      (let ((msg (json-parse-buffer :array-type  'list
+                                                    :object-type 'alist)))
+                        (if (sh-ghc--mk-diag-p msg)
+                            (push (sh-ghc--mk-diag buffer msg) diags)))
+                      (widen)
+                      (forward-line 1))
+                    ;; Report diagnostics.
+                    (funcall report-fn diags)))
+              (flymake-log :warning "Canceling obsolete check %s" proc))
+          ;; Cleanup temporary process buffer and file.
+          (kill-buffer (process-buffer proc))
+          (delete-file file)))))
+
 (defun sh-ghc-flymake (report-fn &rest _args)
   "Flymake backend for GHC with REPORT-FN.
 An error is thrown if GHC command cannot be found."
   ;; TODO support commands for invoking GHC other than Stack.
   (unless (executable-find "stack")
     (error "Cannot find GHC command"))
-  ;; Use a temp file with contents of current buffer.  We must be careful with
-  ;; how we name the temp file because GHC checks the file extension.
-  (let ((buffer    (current-buffer))
-        (temp-file (let ((prefix (file-name-sans-extension buffer-file-name))
-                         (suffix (file-name-extension buffer-file-name 't)))
-                     (make-temp-file prefix nil suffix))))
+  ;; Check for process launched by earlier check and kill it if found.
+  (if (process-live-p sh-ghc--flymake-proc)
+      (kill-process sh-ghc--flymake-proc))
+  (let* ((init-buffer (current-buffer))
+         ;; Use a temp file with contents of current buffer.  We must be careful
+         ;; with how we name the file because GHC checks the file extension.
+         (temp-file   (let ((prefix (file-name-sans-extension buffer-file-name))
+                            (suffix (file-name-extension buffer-file-name t)))
+                        (make-temp-file prefix nil suffix)))
+         (proc-name   "sh-ghc-flymake")
+         (proc-buffer (generate-new-buffer "*sh-ghc-flymake*"))
+         (proc-cmd    (list "stack"
+                            "ghc"
+                            "--"
+                            "-fdiagnostics-color=never"
+                            "-fno-code"
+                            "-ddump-json"
+                            "-Wall"
+                            temp-file))
+         (proc-helper (sh-ghc--flymake-proc report-fn init-buffer temp-file)))
     (write-region nil nil temp-file)
-    ;; TODO run GHC in asychronous sub-process or use GHCi inferior process.
-    ;; Run GHC and report diagnostics.
-    (unwind-protect
-        (let ((mk-diag (apply-partially 'sh-ghc--mk-diag buffer))
-              (msgs    (sh-ghc--command temp-file)))
-          (setq msgs (seq-filter 'sh-ghc--mk-diag-p msgs)
-                msgs (seq-map mk-diag msgs))
-          (funcall report-fn msgs))
-      ;; Clean up temp file.
-      (delete-file temp-file))))
+    ;; Run GHC in asychronous sub-process.  If Stack is used, then this command
+    ;; could take a while to run the first time it is invoked, depending on
+    ;; which dependencies are needed.
+    (setq sh-ghc--flymake-proc (make-process :name            proc-name
+                                             :buffer          proc-buffer
+                                             :command         proc-cmd
+                                             :connection-type 'pipe
+                                             :sentinel        proc-helper))))
 
 ;; Add this to ‘haskell-mode-hook’.
 (defun sh-ghc-flymake-init ()
   "Initialize Flymake backend for GHC."
   (add-hook 'flymake-diagnostic-functions 'sh-ghc-flymake nil t))
-
-;; If Stack is used, then this command could take a while to run the first time
-;; it is invoked, depending on which dependencies are needed.  See
-;; https://gitlab.haskell.org/ghc/ghc for details on JSON encoding of errors.
-(defun sh-ghc--command (file)
-  "Invoke GHC on FILE.
-An error is thrown if GHC command cannot be found."
-  ;; TODO support commands for invoking GHC other than Stack.
-  (unless (executable-find "stack")
-    (error "Cannot find GHC command"))
-  (let* ((opts (list "-fdiagnostics-color=never"
-                     "-fno-code"
-                     "-ddump-json"
-                     "-Wall"))
-         (cmd  (concat "stack ghc -- "
-                       (string-join opts " ")
-                       " "
-                       (shell-quote-argument file))))
-    ;; By default, JSON arrays are represented as Lisp arrays and JSON objects
-    ;; are represented as Lisp hash tables.  Use Lisp lists and alists instead
-    ;; to avoid the overhead of creating an arrays or hash table.
-    (seq-map (lambda (s) (json-parse-string s
-                                            :array-type  'list
-                                            :object-type 'alist))
-             (split-string (shell-command-to-string cmd) "\n" t))))
 
 (defun sh-ghc--mk-diag-p (msg)
   "Predicate to test if a Flymake diagnostic should be made for MSG."
