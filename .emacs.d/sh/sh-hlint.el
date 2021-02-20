@@ -3,8 +3,8 @@
 ;;; Commentary:
 
 ;; This library adds support for HLint to Emacs.  It has been tested with
-;; version 3.1.6 of HLint on Fedora 33.  See https://github.com/ndmitchell/hlint
-;; for more information about HLint.
+;; version 3.1.6 of HLint and version 27.1 of Emacs on Fedora 33.  See
+;; https://github.com/ndmitchell/hlint for more information about HLint.
 
 ;; The library includes a Flymake backend for HLint which uses a project level
 ;; hint file if found.  See the Flymake manual for more information about
