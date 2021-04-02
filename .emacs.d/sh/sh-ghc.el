@@ -27,6 +27,7 @@
   "Make GHC process sentinel with REPORT-FN, BUFFER, and FILE."
   (lambda (proc _event)
     ;; The process sentinel is called whenever the process state changes.
+    ;; Use ‘process-status’ instead of checking the ‘_event’ argument.
     (if (eq 'exit (process-status proc))
         (unwind-protect
             ;; Only proceed if ‘proc’ was launched by current check.  We must be
@@ -34,6 +35,7 @@
             ;; ‘sh-ghc--flymake-proc’ is buffer-local.
             (if (with-current-buffer buffer (eq proc sh-ghc--flymake-proc))
                 (with-current-buffer (process-buffer proc)
+                  ;; TODO remove debug message.
                   (flymake-log :debug (buffer-string))
                   (goto-char (point-min))
                   (let ((diags nil))
@@ -74,6 +76,7 @@ An error is thrown if GHC command cannot be found."
                         (make-temp-file prefix nil suffix)))
          (proc-name   "sh-ghc-flymake")
          (proc-buffer (generate-new-buffer "*sh-ghc-flymake*"))
+         ;; TODO handle imports.
          (proc-cmd    (list "stack"
                             "ghc"
                             "--"
@@ -154,11 +157,16 @@ An error is thrown if the severity field has an unexpected value."
     (_            (error "Missing or unexpected severity"))))
 
 (defun sh-ghc--mk-diag-text (msg)
-  "Build Flymake diagnostic text for MSG."
-  (pcase msg
-    ((map ('doc :null))    (error "Null doc"))
-    ((map ('reason :null)) (error "Null reason"))
-    ((map reason doc)      (format "Reason: %s\nMessage:\n%s" reason doc))))
+  "Build Flymake diagnostic text for MSG.
+An error is thrown if the doc field is null."
+  (map-let (doc reason) msg
+    (if (eq doc :null)
+        (error "Null doc"))
+    (setq doc    (concat "Message:\n" doc)
+          reason (if (eq reason :null)
+                     ""
+                   (format "Reason: %s\n" reason)))
+    (concat reason doc)))
 
 ;;; Test:
 
@@ -230,6 +238,16 @@ lines and columns."
     (should (string= (pop text) "Reason: Opt_WarnUnusedMatches"))
     (should (string= (pop text) "Message:"))
     (should (string= (pop text) "Defined but not used: ‘xs’"))))
+
+(ert-deftest sh-ghc--mk-diag-text-test-2 ()
+  "Test ‘sh-ghc--mk-diag-text’ with message missing reason."
+  (let ((text (sh-ghc--mk-diag-text '((doc      . "Could not find module Foo")
+                                      (severity . "SevError")
+                                      (reason   . :null)))))
+    (setq text (split-string text "\n"))
+    (should (= (length text) 2))
+    (should (string= (pop text) "Message:"))
+    (should (string= (pop text) "Could not find module Foo"))))
 
 (provide 'sh-ghc)
 ;;; sh-ghc.el ends here
