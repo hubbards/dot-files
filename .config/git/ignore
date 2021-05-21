@@ -11,3 +11,6 @@
 
 # Compiled Emacs Lisp files
 *.elc
+
+# IntelliJ project directory
+.idea
